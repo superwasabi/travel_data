@@ -15,7 +15,7 @@ import java.util.Properties;
 
 /**
 *@Author 东哥
-*@Company 千锋好程序员大数据
+*@Company 千锋好程序员大数
 *@Date 2020/3/25 0025
 *@Description zookeeper的工具
 **/
