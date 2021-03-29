@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import edu.neu.bigdata.realtime.constant.CommonConstant;
 import edu.neu.bigdata.realtime.dvo.GisDO;
 import edu.neu.bigdata.realtime.enumes.*;
-import edu.neu.bigdata.realtime.enumes.*;
 import edu.neu.bigdata.realtime.util.AmapGisUtil;
 import edu.neu.bigdata.realtime.util.CommonUtil;
 import edu.neu.bigdata.realtime.util.QParameterTool;
@@ -18,7 +17,7 @@ import java.util.*;
 **/
 public class TravelCurLogHelper {
 
-    //=====基础信息==============================================================
+    //用户信息
     //kafka分区Key
     public static final String KEY_KAFKA_ID = "KAFKA_ID";
 
@@ -72,36 +71,20 @@ public class TravelCurLogHelper {
 
     //创建时间
     public static final String KEY_CT = "ct";
-
-    //=====扩展信息==============================================================
-
+    //用户点击事件信息
     public static final String KEY_EXTS = "exts";
-
-    //产品ID
-    public static final String KEY_PRODUCT_ID = "productID";
-
-    //产品列表
-    public static final String KEY_PRODUCT_IDS = "productIDS";
-
     //目标信息
     public static final String KEY_EXTS_TARGET_ID = "targetID";
     public static final String KEY_EXTS_TARGET_IDS = "targetIDS";
-    public static final String KEY_EXTS_TARGET_KEYS = "targetKeys";
-
-    //=====查询信息==============================================================
-
+    //用户查询信息
     public static final String KEY_EXTS_QUERY_TRAVEL_TIME = "travelTime";//行程天数
     public static final String KEY_EXTS_QUERY_HOT_TARGET = "hotTarget";//热门目的地
     public static final String KEY_EXTS_QUERY_SEND = "travelSend";//出发地
     public static final String KEY_EXTS_QUERY_SEND_TIME = "travelSendTime";//出发时间
     public static final String KEY_EXTS_QUERY_PRODUCT_TYPE = "productType";//产品类型：跟团、私家、半自助
     public static final String KEY_EXTS_QUERY_PRODUCT_LEVEL = "productLevel";//产品钻级
-
-
     //用户数量限制级别
     public static final Integer USER_COUNT_LEVEL = 5;
-
-
     //地区信息
     public static List<GisDO> giss = new ArrayList<GisDO>();
     static {
@@ -442,9 +425,6 @@ public class TravelCurLogHelper {
     public static void testODSData(String topic, String selectAction, int count,long sleep) throws Exception{
         //发送序列化对象
         String dateFormatter = CommonConstant.FORMATTER_YYYYMMDDHHMMDD;
-        String dayFormatter = CommonConstant.FORMATTER_YYYYMMDD;
-        ChronoUnit chronoUnit = ChronoUnit.MINUTES;
-        ChronoUnit dayChronoUnit = ChronoUnit.DAYS;
 
         //时间(天)范围轨迹数据
         while(true){
@@ -466,66 +446,6 @@ public class TravelCurLogHelper {
             totalDatas.clear();
         }
     }
-
-
-
-    /**
-     * 测试清洗数据
-     * @param topic
-     * @param count
-     * @param beginDay
-     * @param endDay
-     * @param dayBegin
-     * @param dayEnd
-     * @param sleep
-     * @throws Exception
-     */
-    public static void testDWDataOld(String topic, String selectAction, int count,String beginDay, String endDay, String dayBegin,String dayEnd,long sleep) throws Exception{
-        //发送序列化对象
-        String dateFormatter = CommonConstant.FORMATTER_YYYYMMDDHHMMDD;
-        String dayFormatter = CommonConstant.FORMATTER_YYYYMMDD;
-        ChronoUnit chronoUnit = ChronoUnit.MINUTES;
-        ChronoUnit dayChronoUnit = ChronoUnit.DAYS;
-
-        //时间(天)范围轨迹数据
-        int diffDay = CommonUtil.calculateTimeDiffDay(dayFormatter, beginDay, endDay, Calendar.DATE).intValue();
-        for(int i=0;i<=diffDay;i++){
-            Map<String,String> totalDatas = new HashMap<String,String>();
-
-            String curDay = CommonUtil.computeFormatTime(beginDay, i, Calendar.DATE, dayFormatter);
-            String btStr = curDay+dayBegin;
-            String etStr = curDay+dayEnd;
-
-            //每天的轨迹数据
-            int diff = CommonUtil.calculateTimeDiffDay(dateFormatter, btStr, etStr, Calendar.SECOND).intValue();
-            for(int z=0;z<=diff;z++){
-                for(int y=1; y<count; y++){
-                    String curTime = CommonUtil.computeFormatTime(btStr, z, Calendar.SECOND, dateFormatter);
-                    List<Map<String,Object>> datas = getTravelDWDatas(selectAction, curTime, count);
-                    for(Map<String,Object> data : datas){
-                        String kafkaKey = data.getOrDefault(KEY_KAFKA_ID,"").toString();
-                        String dataJson = JSON.toJSONString(data);
-                        //System.out.println("dataJson=>" + dataJson);
-                        totalDatas.put(kafkaKey, dataJson);
-                    }
-                }
-
-                //String datas = JSON.toJSONString(totalDatas);
-                //System.out.println("dw.data send =" + datas);
-
-                KafkaProducerUtil.sendMsg(CommonConstant.KAFKA_PRODUCER_JSON_PATH, topic, totalDatas);
-                System.out.println("kafka producer send =" + CommonUtil.formatDate4Def(new Date()));
-                Thread.sleep(sleep);
-                totalDatas.clear();
-            }
-
-            KafkaProducerUtil.sendMsg(CommonConstant.KAFKA_PRODUCER_JSON_PATH, topic, totalDatas);
-            System.out.println("kafka producer send =" + CommonUtil.formatDate4Def(new Date()));
-        }
-    }
-
-
-
     /**
      * 测试清洗数据
      * @param topic
@@ -593,18 +513,11 @@ public class TravelCurLogHelper {
 
     public static final String KEY_TOPIC = "topic";
     public static final String KEY_SOURCE = "source";
-    public static final String KEY_BEGIN = "begin";
-    public static final String KEY_END = "end";
     public static final String KEY_COUNT = "count";
     public static final String KEY_SLEEP = "sleep";
 
     public static final String SOURCE_ODS = "ods";
     public static final String SOURCE_DW = "dw";
-
-    public static final String TIME_ORDER = "time_order";
-
-    public static final Integer TIME_RANGE_MIN = 1;
-    public static final Integer TIME_RANGE_MAX = 120;
 
     public static final Integer COUNT_MIN = 1;
     public static final Integer COUNT_MAX = 10000;

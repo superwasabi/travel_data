@@ -93,17 +93,9 @@ public class TravelOrderHelper implements Serializable {
 
     //酒店
     public static final String PUB_KEY_ID = "pub_id";
-    public static final String PUB_KEY_NAME = "pub_name";
-    public static final String PUB_KEY_STAT = "pub_star";
-    public static final String PUB_KEY_GRADE = "pub_grade";
-    public static final String PUB_KEY_GRADEDESC = "pub_grade_desc";
-    public static final String PUB_KEY_AREACODE = "pub_area_code";
-    public static final String PUB_KEY_ADDRESS = "pub_address";
-    public static final String PUB_KEY_IS_NATIONAL = "is_national";
 
     //产品
     public static final String PRODUCT_KEY_ID = "product_id";
-    public static final String SHOP_KEY_ID = "shop_id";
 
     //=================================================================
 
@@ -131,26 +123,6 @@ public class TravelOrderHelper implements Serializable {
             }
         }
         return regions;
-    }
-
-    //酒店住宿
-    public static List<String> pubs = new ArrayList<String>();
-    public static List<String> getPubs(){
-        if(CollectionUtils.isEmpty(pubs)){
-            try {
-                List<Map<String,String>> pubDatas= CSVUtil.readCSVFile(CSVUtil.PUB_FILE,CSVUtil.QUOTE_COMMON);
-                if(CollectionUtils.isNotEmpty(pubDatas)){
-                    for(Map<String,String> pub : pubDatas){
-                        String pubID = pub.getOrDefault(PUB_KEY_ID,"");
-                        pubs.add(pubID);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("TravelOrderHeler.pub.error:", e);
-            }
-        }
-        return pubs;
     }
 
     /**
@@ -336,67 +308,6 @@ public class TravelOrderHelper implements Serializable {
         }
         return result;
     }
-
-
-    /**
-     * 测试原始数据
-     * @param topic
-     * @param count
-     * @param beginDay
-     * @param endDay
-     * @param dayBegin
-     * @param dayEnd
-     * @param sleep
-     * @throws Exception
-     */
-    public static void testTravelProductData(String topic, int count, String beginDay, String endDay, String dayBegin,String dayEnd,long sleep) throws Exception{
-        //发送序列化对象
-        String dateFormatter = CommonConstant.FORMATTER_YYYYMMDDHHMMDD;
-        String dayFormatter = CommonConstant.FORMATTER_YYYYMMDD;
-        ChronoUnit chronoUnit = ChronoUnit.MINUTES;
-        ChronoUnit dayChronoUnit = ChronoUnit.DAYS;
-
-        //辅助数据
-        //地区信息
-        List<RegionDO> regions = getRegions();
-        Map<String,String> pubs = getPubMappingPro();
-        List<String> productIDs = getProducts();
-
-        //时间(天)范围轨迹数据
-        int diffDay = CommonUtil.calculateTimeDiffDay(dayFormatter, beginDay, endDay, Calendar.DATE).intValue();
-        for(int i=0;i<=diffDay;i++){
-            Map<String,String> totalDatas = new HashMap<String,String>();
-
-            String curDay = CommonUtil.computeFormatTime(beginDay, i, Calendar.DATE, dayFormatter);
-            String btStr = curDay+dayBegin;
-            String etStr = curDay+dayEnd;
-
-            //每天的轨迹数据
-            int diff = CommonUtil.calculateTimeDiffDay(dateFormatter, btStr, etStr, Calendar.SECOND).intValue();
-            for(int z=0;z<=diff;z++){
-                for(int y=1; y<count; y++){
-                    String curTime = CommonUtil.computeFormatTime(btStr, z, Calendar.SECOND, dateFormatter);
-
-                    Map<String,Object> data = getTravelOrderDatas(curTime, count, regions, pubs, productIDs);
-                    String datas = JSON.toJSONString(data);
-                    System.out.println("ods.data send =" + datas);
-
-                    String kafkaKey = data.getOrDefault(KEY_KAFKA_ID,"").toString();
-                    String dataJson = JSON.toJSONString(data);
-                    totalDatas.put(kafkaKey, dataJson);
-                }
-                KafkaProducerUtil.sendMsg(CommonConstant.KAFKA_PRODUCER_JSON_PATH, topic, totalDatas);
-                System.out.println("kafka producer send =" + CommonUtil.formatDate4Def(new Date()));
-                Thread.sleep(sleep);
-                totalDatas.clear();
-            }
-
-            KafkaProducerUtil.sendMsg(CommonConstant.KAFKA_PRODUCER_JSON_PATH, topic, totalDatas);
-            System.out.println("kafka producer send =" + CommonUtil.formatDate4Def(new Date()));
-        }
-    }
-
-
     /**
      * 测试原始数据
      * @param topic
@@ -457,12 +368,6 @@ public class TravelOrderHelper implements Serializable {
 
         testTravelProductDataForevor(topic, count, sleep);
 
-//        if(SOURCE_PRODUCT.equalsIgnoreCase(source)){
-//            testTravelProductData(topic, count, beginDay, endDay, dayBegin, dayEnd, sleep);
-//        }else if(SOURCE_PAY.equalsIgnoreCase(source)){
-//
-//        }
-
 
     }
 
@@ -470,19 +375,11 @@ public class TravelOrderHelper implements Serializable {
 
     public static final String KEY_TOPIC = "topic";
     public static final String KEY_SOURCE = "source";
-    public static final String KEY_BEGIN = "begin";
-    public static final String KEY_END = "end";
     public static final String KEY_COUNT = "count";
     public static final String KEY_SLEEP = "sleep";
 
     public static final String SOURCE_PRODUCT = "product";
     public static final String SOURCE_PAY = "pay";
-
-    public static final String TIME_ORDER = "time_order";
-
-    public static final Integer TIME_RANGE_MIN = 1;
-    public static final Integer TIME_RANGE_MAX = 120;
-
     public static final Integer COUNT_MIN = 1;
     public static final Integer COUNT_MAX = 10000;
 

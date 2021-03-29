@@ -37,35 +37,5 @@ public class ReflexUtil implements Serializable {
         }
     }
 
-    /**
-     * 静态方法反射执行
-     * @param clsName
-     * @param methodName
-     * @return
-     * @throws Exception
-     */
-    public static Object invoke(String clsName,String methodName) throws Exception{
-        Class<?> clazz = Class.forName(clsName);
-        Method method = clazz.getMethod(methodName);
-        return method.invoke(null);
-    }
-
-    public static Object invoke(String clsName,String methodName,String paramCls,Object param) throws Exception{
-        Class<?> clazz = Class.forName(clsName);
-        Class<?> pcls = datatypes.getOrDefault(paramCls, String.class);
-        Method method = clazz.getMethod(methodName,pcls);
-        return method.invoke(null,param);
-    }
-
-//    public static void main(String[] args) throws Exception {
-//
-//       Object obj = invoke("com.bigdata.demo.offine.util.CommonUtil","getRandomName");
-//       System.out.println(obj);
-//
-//        Object obj2 = invoke("com.bigdata.demo.offine.util.CommonUtil","getRandom","int",10);
-//        System.out.println(obj2);
-//
-//    }
-
 }
 

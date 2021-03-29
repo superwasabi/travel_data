@@ -46,10 +46,4 @@ public class KafkaPartitionKeyUtil implements Partitioner {
 
         return position;
     }
-
-    public static void main(String[] args) throws  Exception{
-
-        
-
-    }
 }

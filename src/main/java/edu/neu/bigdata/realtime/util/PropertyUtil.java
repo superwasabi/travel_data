@@ -15,8 +15,6 @@ public class PropertyUtil implements Serializable{
 
     private static Logger log = LoggerFactory.getLogger(PropertyUtil.class);
 
-    public static final String PROPERTY_FILTER = ".properties";
-
     /**
      * 读取资源文件
      * @param proPath
@@ -43,18 +41,5 @@ public class PropertyUtil implements Serializable{
         }
         return properties;
     }
-
-
-    public static boolean getProperty(Properties props, String key) {
-        Boolean result = null;
-        try{
-            result =  Boolean.parseBoolean(props.getProperty(key).trim());
-        }catch(Exception e){
-            log.error("PropertiesUtil.getProperty4Int:" + e.getMessage());
-        }
-        return result;
-    }
-
-
 
 }

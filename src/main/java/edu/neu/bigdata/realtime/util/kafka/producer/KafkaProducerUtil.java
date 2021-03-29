@@ -47,40 +47,4 @@ public class KafkaProducerUtil {
         }
 
     }
-
-
-    /**
-     * kryo序列化
-     * @param path
-     * @param topic
-     * @param datas
-     */
-    public static void sendMsg4Kryo(String path, String topic, Map<String,Serializable> datas){
-        Validate.notEmpty(path, "kafka config path is not empty");
-        Validate.notEmpty(topic, "topic is not empty");
-        Validate.notNull(datas, "datas is not empty");
-        try{
-            Properties props = KafkaUtil.readKafkaProps(path);
-            KafkaProducer<String, Serializable>  producer = new KafkaProducer<String, Serializable>(props);
-            if(null != producer){
-                for(Map.Entry<String, Serializable> entry : datas.entrySet()){
-                    String key = entry.getKey();
-                    Serializable value = entry.getValue();
-                    log.info("Producer.key=" + key + ",value=" + value);
-                    producer.send(new ProducerRecord<String, Serializable>(topic, key, value));
-                    producer.flush();
-                }
-                producer.close();
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-
-
-    //==========================================================================
-    public static void main(String[] args) throws  Exception {
-
-    }
 }

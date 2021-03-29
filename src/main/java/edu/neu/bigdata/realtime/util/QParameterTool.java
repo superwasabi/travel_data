@@ -71,37 +71,6 @@ public class QParameterTool implements Serializable, Cloneable{
     }
 
     /**
-     * Returns {@link QParameterTool} for the given {@link Properties} file.
-     *
-     * @param file File object to the properties file
-     * @return A {@link QParameterTool}
-     * @throws IOException If the file does not exist
-     * @see Properties
-     */
-    public static QParameterTool fromPropertiesFile(File file) throws IOException {
-        if (!file.exists()) {
-            throw new FileNotFoundException("Properties file " + file.getAbsolutePath() + " does not exist");
-        }
-        try (FileInputStream fis = new FileInputStream(file)) {
-            return fromPropertiesFile(fis);
-        }
-    }
-
-    /**
-     * Returns {@link QParameterTool} for the given InputStream from {@link Properties} file.
-     *
-     * @param inputStream InputStream from the properties file
-     * @return A {@link QParameterTool}
-     * @throws IOException If the file does not exist
-     * @see Properties
-     */
-    public static QParameterTool fromPropertiesFile(InputStream inputStream) throws IOException {
-        Properties props = new Properties();
-        props.load(inputStream);
-        return fromMap((Map) props);
-    }
-
-    /**
      * Returns {@link QParameterTool} for the given map.
      *
      * @param map A map of arguments. Both Key and Value have to be Strings
@@ -147,28 +116,8 @@ public class QParameterTool implements Serializable, Cloneable{
         return Objects.hash(data, defaultData, unrequestedParameters);
     }
 
-    /**
-     * Returns the set of parameter names which have not been requested with
-     * {@link #has(String)} or one of the {@code get} methods. Access to the
-     * map returned by {@link #toMap()} is not tracked.
-     */
-    public Set<String> getUnrequestedParameters() {
-        return Collections.unmodifiableSet(unrequestedParameters);
-    }
-
     // ------------------ Get data from the util ----------------
 
-    /**
-     * Returns number of parameters in {@link QParameterTool}.
-     */
-    public int getNumberOfParameters() {
-        return data.size();
-    }
-
-    /**
-     * Returns the String value for the given key.
-     * If the key does not exist it will return null.
-     */
     public String get(String key) {
         addToDefaults(key, null);
         unrequestedParameters.remove(key);
@@ -188,28 +137,7 @@ public class QParameterTool implements Serializable, Cloneable{
         return value;
     }
 
-    /**
-     * Returns the String value for the given key.
-     * If the key does not exist it will return the given default value.
-     */
-    public String get(String key, String defaultValue) {
-        addToDefaults(key, defaultValue);
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return value;
-        }
-    }
 
-    /**
-     * Check if value is set.
-     */
-    public boolean has(String value) {
-        addToDefaults(value, null);
-        unrequestedParameters.remove(value);
-        return data.containsKey(value);
-    }
 
     // -------------- Integer
 
@@ -221,174 +149,6 @@ public class QParameterTool implements Serializable, Cloneable{
         addToDefaults(key, null);
         String value = getRequired(key);
         return Integer.parseInt(value);
-    }
-
-    /**
-     * Returns the Integer value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not an Integer.
-     */
-    public int getInt(String key, int defaultValue) {
-        addToDefaults(key, Integer.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        return Integer.parseInt(value);
-    }
-
-    // -------------- LONG
-
-    /**
-     * Returns the Long value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public long getLong(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Long.parseLong(value);
-    }
-
-    /**
-     * Returns the Long value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not a Long.
-     */
-    public long getLong(String key, long defaultValue) {
-        addToDefaults(key, Long.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        }
-        return Long.parseLong(value);
-    }
-
-    // -------------- FLOAT
-
-    /**
-     * Returns the Float value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public float getFloat(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Float.valueOf(value);
-    }
-
-    /**
-     * Returns the Float value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not a Float.
-     */
-    public float getFloat(String key, float defaultValue) {
-        addToDefaults(key, Float.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return Float.valueOf(value);
-        }
-    }
-
-    // -------------- DOUBLE
-
-    /**
-     * Returns the Double value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public double getDouble(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Double.valueOf(value);
-    }
-
-    /**
-     * Returns the Double value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not a Double.
-     */
-    public double getDouble(String key, double defaultValue) {
-        addToDefaults(key, Double.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return Double.valueOf(value);
-        }
-    }
-
-    // -------------- BOOLEAN
-
-    /**
-     * Returns the Boolean value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public boolean getBoolean(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Boolean.valueOf(value);
-    }
-
-    /**
-     * Returns the Boolean value for the given key. If the key does not exists it will return the default value given.
-     * The method returns whether the string of the value is "true" ignoring cases.
-     */
-    public boolean getBoolean(String key, boolean defaultValue) {
-        addToDefaults(key, Boolean.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return Boolean.valueOf(value);
-        }
-    }
-
-    // -------------- SHORT
-
-    /**
-     * Returns the Short value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public short getShort(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Short.valueOf(value);
-    }
-
-    /**
-     * Returns the Short value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not a Short.
-     */
-    public short getShort(String key, short defaultValue) {
-        addToDefaults(key, Short.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return Short.valueOf(value);
-        }
-    }
-
-    // -------------- BYTE
-
-    /**
-     * Returns the Byte value for the given key.
-     * The method fails if the key does not exist.
-     */
-    public byte getByte(String key) {
-        addToDefaults(key, null);
-        String value = getRequired(key);
-        return Byte.valueOf(value);
-    }
-
-    /**
-     * Returns the Byte value for the given key. If the key does not exists it will return the default value given.
-     * The method fails if the value is not a Byte.
-     */
-    public byte getByte(String key, byte defaultValue) {
-        addToDefaults(key, Byte.toString(defaultValue));
-        String value = get(key);
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return Byte.valueOf(value);
-        }
     }
 
     // --------------- Internals
@@ -412,88 +172,10 @@ public class QParameterTool implements Serializable, Cloneable{
     // ------------------------- Export to different targets -------------------------
 
 
-    /**
-     * @return A {@link Properties}
-     */
-    public Properties getProperties() {
-        Properties props = new Properties();
-        props.putAll(this.data);
-        return props;
-    }
-
-    /**
-     * Create a properties file with all the known parameters (call after the last get*() call).
-     * Set the default value, if available.
-     *
-     * <p>Use this method to create a properties file skeleton.
-     *
-     * @param pathToFile Location of the default properties file.
-     */
-    public void createPropertiesFile(String pathToFile) throws IOException {
-        createPropertiesFile(pathToFile, true);
-    }
-
-    /**
-     * Create a properties file with all the known parameters (call after the last get*() call).
-     * Set the default value, if overwrite is true.
-     *
-     * @param pathToFile Location of the default properties file.
-     * @param overwrite Boolean flag indicating whether or not to overwrite the file
-     * @throws IOException If overwrite is not allowed and the file exists
-     */
-    public void createPropertiesFile(String pathToFile, boolean overwrite) throws IOException {
-        final File file = new File(pathToFile);
-        if (file.exists()) {
-            if (overwrite) {
-                file.delete();
-            } else {
-                throw new RuntimeException("File " + pathToFile + " exists and overwriting is not allowed");
-            }
-        }
-        final Properties defaultProps = new Properties();
-        defaultProps.putAll(this.defaultData);
-        try (final OutputStream out = new FileOutputStream(file)) {
-            defaultProps.store(out, "Default file created by Flink's ParameterUtil.createPropertiesFile()");
-        }
-    }
 
     protected Object clone() throws CloneNotSupportedException {
         return new QParameterTool(this.data);
     }
-
-    // ------------------------- Interaction with other ParameterUtils -------------------------
-
-    /**
-     * Merges two {@link QParameterTool}.
-     *
-     * @param other Other {@link QParameterTool} object
-     * @return The Merged {@link QParameterTool}
-     */
-    public QParameterTool mergeWith(QParameterTool other) {
-        final Map<String, String> resultData = new HashMap<>(data.size() + other.data.size());
-        resultData.putAll(data);
-        resultData.putAll(other.data);
-
-        final QParameterTool ret = new QParameterTool(resultData);
-
-        final HashSet<String> requestedParametersLeft = new HashSet<>(data.keySet());
-        requestedParametersLeft.removeAll(unrequestedParameters);
-
-        final HashSet<String> requestedParametersRight = new HashSet<>(other.data.keySet());
-        requestedParametersRight.removeAll(other.unrequestedParameters);
-
-        ret.unrequestedParameters.removeAll(requestedParametersLeft);
-        ret.unrequestedParameters.removeAll(requestedParametersRight);
-
-        return ret;
-    }
-
-    // ------------------------- ExecutionConfig.UserConfig interface -------------------------
-
-    public Map<String, String> toMap() {
-        return data;
-    }
-
     // ------------------------- Serialization ---------------------------------------------
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
